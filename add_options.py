@@ -6,7 +6,7 @@ Import("env")
 #print(env.Dump())
 
 gcc_options =  ['-Wreturn-local-addr', '-Werror=return-local-addr' ]
-clan_options = ['-Wreturn-stack-address', '-Werror=return-stack-address' ]
+clang_options = ['-Wreturn-stack-address', '-Werror=return-stack-address' ]
 
 # native
 if 'PIOFRAMEWORK' not in env: 
