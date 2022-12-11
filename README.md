@@ -74,4 +74,4 @@ int main()
 
 
 ## ユニットテスト
-[GoogleTest](https://google.github.io/googletest/) により実装されたユニットテストを [platformio.ini](platformio.ini] で実行することができます。(Native / Embedded)  
+[GoogleTest](https://google.github.io/googletest/) により実装されたユニットテストを [platformio.ini](platformio.ini) で実行することができます。(Native / Embedded)  
