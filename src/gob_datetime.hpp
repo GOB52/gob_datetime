@@ -551,17 +551,17 @@ class OffsetDateTime
     constexpr OffsetDateTime(const LocalDate& ld, const LocalTime& lt, const ZoneOffset& zo) : OffsetDateTime({ld,lt}, zo) {}
     constexpr OffsetDateTime(const LocalDateTime& ldt, const ZoneOffset& zo) : _datetime(ldt), _zoff(zo) {}
     constexpr OffsetDateTime(const struct tm& tm, const ZoneOffset& zo) : OffsetDateTime(LocalDateTime(tm), zo) {}
-    explicit OffsetDateTime(const char* s) { *this = parse(s); }
+    explicit  OffsetDateTime(const char* s) { *this = parse(s); }
     ///@}
 
     ///@name Properties
     ///@{
-    constexpr int16_t    year()       const   { return _datetime.year(); } //!< @brief Gets the year.
-    constexpr int8_t     month()      const  { return _datetime.month();  } //!< @brief Gets the month.
-    constexpr int8_t     day()        const    { return _datetime.day(); } //!< @brief Gets the day.
+    constexpr int16_t    year()       const { return _datetime.year(); } //!< @brief Gets the year.
+    constexpr int8_t     month()      const { return _datetime.month();  } //!< @brief Gets the month.
+    constexpr int8_t     day()        const { return _datetime.day(); } //!< @brief Gets the day.
     constexpr DayOfWeek  dayOfWeek()  const { return _datetime.dayOfWeek(); } //!< @brief Gets the day of week, which is an enum DayOfWeek.
     constexpr bool       isLeapYear() const { return _datetime.isLeapYear(); } //!< @brief Is leap year?
-    constexpr int8_t     hour()       const   { return _datetime.hour(); } //!< @brief Gets the hour.
+    constexpr int8_t     hour()       const { return _datetime.hour(); } //!< @brief Gets the hour.
     constexpr int8_t     hour12()     const { return _datetime.hour12(); } //!< @brief Gets the 12 hour clock [1-12]
     constexpr int8_t     minute()     const { return _datetime.minute(); } //!< @brief Gets the minute.
     constexpr int8_t     second()     const { return _datetime.second(); } //!< @brief Gets the second.
