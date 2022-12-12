@@ -95,7 +95,7 @@ using timediff_t = double; // Same as retuen value type of std::difftime.
 */
 const char* locationToPOSIX(const char* location);
 
-///@name Interconversion of struct tm elements.
+///@name Interconversion of struct tm elements.(year, month)
 ///@{
 constexpr int year2tm (const int year)  { return year - 1900; } //!< @brief from year to tm_year.
 constexpr int month2tm(const int month) { return month - 1;   } //!< @brief from month to tm_mon.
@@ -111,7 +111,7 @@ class OffsetDateTime;
 
 /*!
   @enum Day of week
-  @brief A day-of-week, such as Sun
+  @brief A day-of-week, such as Sun..
 */
 enum class DayOfWeek : uint8_t
 {
@@ -150,7 +150,12 @@ class LocalDate
     ///@}
 
     /*! @brief Is valid instance? */
-    constexpr bool valid() const { return _year >= MIN_YEAR && (_month >= MIN_MONTH &&  _month <= MAX_MONTH) && (_day >= MIN_DAY && _day <= lengthOfMonth()); }
+    constexpr bool valid() const
+    {
+        return (_year != MAX_YEAR) ?
+                  (_year >= MIN_YEAR && _year <= MAX_YEAR && _month >= MIN_MONTH && _month <= MAX_MONTH   && _day >= MIN_DAY && _day <= lengthOfMonth())
+                : (_month >= MIN_MONTH && _month <= MAX.month() && _day >= MIN_DAY && _day <= MAX.day());
+    }
     /*! @brief Combines this date with the time of midnight to create a LocalDateTime at the start of this date. */
     LocalDateTime atStartOfDay() const;
     /*! @brief Combines this date with a time to create a LocalDateTime. */
@@ -201,7 +206,11 @@ class LocalDate
     int8_t  _day   { MIN_DAY };
 
     static constexpr int16_t MIN_YEAR = 1970;
+#ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
+    static constexpr int16_t MAX_YEAR = 2038;
+#else
     static constexpr int16_t MAX_YEAR = 32767;
+#endif
     static constexpr int8_t  MIN_MONTH = 1;
     static constexpr int8_t  MAX_MONTH = 12;;
     static constexpr int8_t  MIN_DAY = 1;
@@ -326,7 +335,7 @@ class ZoneOffset
     ///@}
 
     /*! @brief Is valid instance? */
-    constexpr bool valid() const { return _seconds >= _min && _seconds <= _max; }
+    constexpr bool valid() const { return _seconds >= MIN_SEC && _seconds <= MAX_SEC; }
     /*!  @brief Outputs normalized offset as a String, such as +09:00 */
     string_t toString() const;
 
@@ -360,8 +369,8 @@ class ZoneOffset
     int32_t _seconds{0};
     static constexpr int32_t SEC_PER_MIN = 60;
     static constexpr int32_t SEC_PER_HOUR = 60 * SEC_PER_MIN;
-    static constexpr int32_t _min = -18 * SEC_PER_HOUR;
-    static constexpr int32_t _max = +18 * SEC_PER_HOUR;
+    static constexpr int32_t MIN_SEC = -18 * SEC_PER_HOUR;
+    static constexpr int32_t MAX_SEC = +18 * SEC_PER_HOUR;
     static const ZoneOffset INVALID;
 };
 
@@ -435,8 +444,8 @@ class OffsetTime
     inline int32_t toEpochSecond() const { return _lt.toSecondOfDay() - _zoff.totalSeconds(); }
     
   public:
-    static const OffsetTime MIN;
-    static const OffsetTime MAX;
+    static const OffsetTime MIN; //!< //!< @brief The minimum supported offsettime.
+    static const OffsetTime MAX; //!< //!< @brief The maximum supported offsettime.
     
   private:
     LocalTime _lt{};
@@ -526,12 +535,9 @@ class LocalDateTime
     auto operator <=>(const LocalDateTime&) const = default;
 #endif    
 
-    //! @warning Recommended not to use as it is for internal use.
-    friend LocalDateTime operator+(const LocalDateTime& a, const int32_t& sec);
-    
   public:
-    static const LocalDateTime MIN;
-    static const LocalDateTime MAX;
+    static const LocalDateTime MIN; //!< @brief The minimum supported localdatetime.
+    static const LocalDateTime MAX; //!< @brief The maximum supported localdatetime.
 
   private:
     LocalDate _date{};
@@ -624,8 +630,8 @@ class OffsetDateTime
 #endif    
 
   public:
-    static const OffsetDateTime MIN;
-    static const OffsetDateTime MAX;
+    static const OffsetDateTime MIN; //!< @brief The minimum supported offsetdatetime.
+    static const OffsetDateTime MAX; //!< @brief The maximum supported offsetdatetime.
     
   private:
     LocalDateTime _datetime{};

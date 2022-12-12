@@ -60,7 +60,6 @@ void print_time()
     printf("[%s] => [%s]\n", odt.toString().c_str(), odt2.toString().c_str());
 }
 
-
 void loop()
 {
     print_time();

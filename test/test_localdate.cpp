@@ -45,16 +45,16 @@ TEST(LocalDate, Basic)
         EXPECT_STREQ("1970-01-01", ld0.toString().c_str());
     }
     {
-        constexpr LocalDate ld1(2100, 2, 28);
+        constexpr LocalDate ld1(2004, 2, 29);
         EXPECT_TRUE(ld1.valid());
-        EXPECT_EQ(ld1.year(), 2100);
+        EXPECT_EQ(ld1.year(), 2004);
         EXPECT_EQ(ld1.month(), 2);
-        EXPECT_EQ(ld1.day(), 28);
+        EXPECT_EQ(ld1.day(), 29);
         EXPECT_EQ(ld1.dayOfWeek(), DayOfWeek::Sun);
-        EXPECT_FALSE(ld1.isLeapYear());
-        EXPECT_EQ(365, ld1.lengthOfYear());
-        EXPECT_EQ(28, ld1.lengthOfMonth());
-        EXPECT_STREQ("2100-02-28", ld1.toString().c_str());
+        EXPECT_TRUE(ld1.isLeapYear());
+        EXPECT_EQ(366, ld1.lengthOfYear());
+        EXPECT_EQ(29, ld1.lengthOfMonth());
+        EXPECT_STREQ("2004-02-29", ld1.toString().c_str());
     }
     {
         LocalDate ld2("2009-08-07");;
@@ -165,21 +165,7 @@ TEST(LocalDate, Basic)
     }
     // Invalid date
     {
-        struct YMD { int y,m,d; };
-        {
-            YMD tbl[] =
-            {
-                { 2100,  2, 28 },
-                { 2000,  2, 29 },
-                { 1987, 11, 30 }
-            };
-            for(auto& e : tbl)
-            {
-                LocalDate ld(e.y, e.m, e.d);
-                EXPECT_TRUE(ld.valid()) << ld.toString().c_str();
-            }
-        }
-
+        struct YMD { int y, m, d; };
         YMD tbl[] =
         {
             { 2100, 2, 29 },  // 2100 is not leap year, so 02-29 is not exists.
@@ -192,11 +178,21 @@ TEST(LocalDate, Basic)
             { 1192,  8,  0 },
             { 1600, -7,  9 },
             { 1889, 33, 33 },
+            { 2000,  1, -3 },
+            { 2000, -2,  3 },
+            { -234, 10, 30 },
+#ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
+            { 2038,  1, 20 },
+            { 2038, 11,  3 },
+            { 2039,  2,  5 },
+#else
+            { 32768, 1, 1 },
+#endif            
         };
         for(auto& e : tbl)
         {
             LocalDate ld(e.y, e.m, e.d);
-            EXPECT_FALSE(ld.valid()) << ld.toString().c_str();
+            EXPECT_FALSE(ld.valid()) << e.y << "-" << e.m << ":" << e.d;
         }
 
         const char* stbl[] =
@@ -212,11 +208,18 @@ TEST(LocalDate, Basic)
             "1600-67-09",
             "1889-33-33",
             "abcdefg",
+#ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
+            "2038-01-20",
+            "2038-02-11",
+            "2112-09-03",
+#else
+            "32768-01-01",
+#endif            
         };
         for(auto& e : stbl)
         {
-            LocalDate ld(e);
-            EXPECT_FALSE(ld.valid()) << ld.toString().c_str();
+            LocalDate ld(e); // call parse inside.
+            EXPECT_FALSE(ld.valid()) << e;
         }
     }
 }

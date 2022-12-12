@@ -116,7 +116,7 @@ void removeMockClock()
 // class LocalDate
 const LocalDate LocalDate::MIN(MIN_YEAR, MIN_MONTH, MIN_DAY);
 #ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
-const LocalDate LocalDate::MAX(2038, 1, 19); // 2038-01-19
+const LocalDate LocalDate::MAX(MAX_YEAR, 1, 19); // 2038-01-19 ... The Year 2038 problem!
 #else
 const LocalDate LocalDate::MAX(MAX_YEAR, MAX_MONTH, 31);
 #endif
@@ -267,8 +267,8 @@ LocalTime operator+(const LocalTime& a, const int32_t& sec)
 // ----------------------------------------------------------------------
 // class ZoneOffset
 const ZoneOffset ZoneOffset::UTC{0};
-const ZoneOffset ZoneOffset::MIN{ _min };
-const ZoneOffset ZoneOffset::MAX{ _max };
+const ZoneOffset ZoneOffset::MIN{ MIN_SEC };
+const ZoneOffset ZoneOffset::MAX{ MAX_SEC };
 const ZoneOffset ZoneOffset::INVALID { 0xBADBEAF }; // 195935919  "+54426:38:39"
 
 string_t ZoneOffset::toString() const
