@@ -5,7 +5,9 @@
   @mainpage gob_datetime
   date-time classes like Java JSR-310 for C++11 or later.
 
-  @warning Not all methods are available in all JSR classes
+  @sa https://docs.oracle.com/javase/jp/18/docs/api/java.base/java/time/package-summary.html
+
+  @warning Not all methods are available in all java.time classes
   @warning Note that there are restrictions imposed by the time_t and time functions.
   
   @author GOB https://twitter.com/gob_52_gob
