@@ -1,0 +1,22 @@
+{
+  "name": "gob_datetime",
+  "description": "date-time classes like Java JSR 310 for C++11 or later.",
+  "keywords": "datetime,jsr310,c++11,c++14,c++17,c++20",
+  "authors": {
+    "name": "GOB",
+    "url": "https://github.com/GOB52",
+    "maintainer": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GOB52/gob_datetime.git"
+  },
+  "version": "0.1.0",
+  "build": {
+    "libArchive": false
+  },
+  "headers": "gob_datetime.hpp",
+  "license": "MIT",
+  "platforms": "espressif32",
+  "frameworks": "arduino"
+}
