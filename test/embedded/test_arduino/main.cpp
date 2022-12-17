@@ -36,9 +36,11 @@ void setup()
 {
     M5.begin();
 
+    printf("%s", "Connect to WiFi:");
+    
     WiFi.begin(); // Connect to credential in hardware. (ESP32 saves the last Wifi connection)
     int tcount = 20;
-    printf("%s", "Connect to WiFi:");
+
     while(tcount-- > 0 && WiFi.status() != WL_CONNECTED)
     {
         putchar('.');
@@ -48,9 +50,14 @@ void setup()
 
     if(WiFi.status() != WL_CONNECTED)
     {
+        M5.Lcd.fillScreen(TFT_LIGHTGREY);
         printf("*** Failed to connect WiFi ***\n");
     }
-
+    else
+    {
+        M5.Lcd.fillScreen(TFT_ORANGE);
+    }
+    
     // Configurate local time.
     const char* tzstr = goblib::datetime::locationToPOSIX(TIMEZONE_LOCATION);
     configTzTime((tzstr ? tzstr : "UTC0"), ntpURL[0], ntpURL[1], ntpURL[2]);
@@ -60,6 +67,7 @@ void setup()
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
 
+    printf("TZ:%s\n", tzstr ? tzstr : "");
     printf("CPP %ld\n", __cplusplus);
     printf("ESP-IDF Version %d.%d.%d\n",
            (ESP_IDF_VERSION>>16) & 0xFF, (ESP_IDF_VERSION>>8)&0xFF, ESP_IDF_VERSION & 0xFF);
