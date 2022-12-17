@@ -32,7 +32,7 @@ C++20 にて std::chrono に タイムゾーン関連が追加されますが、
 platformio.ini であれば以下の様に書けば自動でダウンロードしてくれます。
 
 ```ini
-lib_deps = git@github.com:GOB52/gob_datetime.git
+lib_deps = https://github.com/GOB52/gob_datetime.git @ ^0.1.0
 ```
 
 ## 使い方

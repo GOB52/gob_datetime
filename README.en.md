@@ -28,7 +28,7 @@ git clone or extract zip file to your library folder.
 If you are using PlatformIO, you can write the following to download automatically.
 
 ```ini
-lib_deps = git@github.com:GOB52/gob_datetime.git
+lib_deps = https://github.com/GOB52/gob_datetime.git @ ^0.1.0
 ```
 
 ## How to use
