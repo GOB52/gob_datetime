@@ -5,6 +5,8 @@
 #include <M5Unified.h>
 #include <WiFi.h>
 #include <gob_datetime.hpp>
+#include <esp_random.h> // esp_random() is hardware RNG. (No random seed initialization is required)
+#include <algorithm>
 
 #if __has_include (<esp_idf_version.h>)
 #include <esp_idf_version.h>
@@ -19,12 +21,51 @@
 
 namespace
 {
-const char* ntpURL[] =
+PROGMEM const char ntp0[] = "ntp.nict.jp";
+PROGMEM const char ntp1[] = "ntp.jst.mfeed.ad.jp";
+PROGMEM const char ntp2[] = "time.cloudflare.com";
+const char* ntpURLTable[] = { ntp0, ntp1, ntp2 }; // DON'T USE PROGMEM! (because it will be shuffled later)
+
+struct ESP32RNG
 {
-    "ntp.nict.jp",
-    "ntp.jst.mfeed.ad.jp",
-    "time.cloudflare.com",
+    using result_type = uint32_t;
+    static result_type min() { return 0; }
+    static result_type max() { return sizeof(ntpURLTable) / sizeof(ntpURLTable[0]); }
+    result_type  operator()() { return esp_random() % max(); }
 };
+
+void configTime(const char* tzstr)
+{
+    Serial.println("Connect WiFi");
+    WiFi.begin(); // Connect to credential in Hardware. (ESP32 saves the last WiFi connection)
+    int tcount = 20;
+    while(tcount-- > 0 && WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+    }
+    if(WiFi.status() != WL_CONNECTED)
+    {
+        M5.Lcd.fillScreen(TFT_LIGHTGREY);
+        Serial.println("Failed to connect");
+        return;
+    }
+    M5.Lcd.fillScreen(TFT_ORANGE);
+
+    std::shuffle(std::begin(ntpURLTable), std::end(ntpURLTable), ESP32RNG());
+    auto ptz = goblib::datetime::locationToPOSIX(tzstr);
+
+    Serial.println(ptz ? ptz : "NONE");
+    Serial.println(ntpURLTable[0]);
+    
+    configTzTime(ptz ? ptz : "", ntpURLTable[0], ntpURLTable[1], ntpURLTable[2]);
+    // waiting for time synchronization
+    {
+        std::tm discard{};
+        getLocalTime(&discard, 10 * 1000);
+    }
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+}
 
 void test()
 {
@@ -36,38 +77,9 @@ void setup()
 {
     M5.begin();
 
-    printf("%s", "Connect to WiFi:");
-    
-    WiFi.begin(); // Connect to credential in hardware. (ESP32 saves the last Wifi connection)
-    int tcount = 20;
-
-    while(tcount-- > 0 && WiFi.status() != WL_CONNECTED)
-    {
-        putchar('.');
-        delay(500);
-    }
-    putchar('\n');
-
-    if(WiFi.status() != WL_CONNECTED)
-    {
-        M5.Lcd.fillScreen(TFT_LIGHTGREY);
-        printf("*** Failed to connect WiFi ***\n");
-    }
-    else
-    {
-        M5.Lcd.fillScreen(TFT_ORANGE);
-    }
-    
     // Configurate local time.
-    const char* tzstr = goblib::datetime::locationToPOSIX(TIMEZONE_LOCATION);
-    configTzTime((tzstr ? tzstr : "UTC0"), ntpURL[0], ntpURL[1], ntpURL[2]);
-    struct tm tmp{};
-    getLocalTime(&tmp); // Waiting for time synchronization.
-    
-    WiFi.disconnect(true);
-    WiFi.mode(WIFI_OFF);
+    configTime(TIMEZONE_LOCATION);
 
-    printf("TZ:%s\n", tzstr ? tzstr : "");
     printf("CPP %ld\n", __cplusplus);
     printf("ESP-IDF Version %d.%d.%d\n",
            (ESP_IDF_VERSION>>16) & 0xFF, (ESP_IDF_VERSION>>8)&0xFF, ESP_IDF_VERSION & 0xFF);
