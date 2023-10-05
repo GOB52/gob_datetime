@@ -149,6 +149,7 @@ class LocalDate
     constexpr bool isLeapYear() const { return (year() % 4 == 0) && ((year() % 100) != 0 || (year() % 400) == 0); } //!< @brief Checks if the year is a leap year, according to the ISO proleptic calendar system rules.
     constexpr int8_t lengthOfMonth() const {  return _lengthOfMonthTable[ isLeapYear() ][month() - 1]; } //!< @brief Returns the length of the month represented by this date.
     constexpr int16_t lengthOfYear() const { return isLeapYear() ? 366 : 365; } //!<  @brief Returns the length of the year represented by this date.
+    constexpr uint32_t hash() const { return ((uint32_t)_year << 11) + ((uint32_t)_month << 6) + (uint32_t)_day; } //!< @brief A hash code for this date. */
     ///@}
 
     /*! @brief Is valid instance? */
@@ -244,6 +245,7 @@ class LocalDate
 /*!
   @class LocalTime
   @brief A time without a time-zone in the ISO-8601 calendar system, such as 12:34:56.
+  @warning Not support ms/us/ns.
  */
 class LocalTime
 {
@@ -265,6 +267,7 @@ class LocalTime
     constexpr int8_t second() const { return _second; } //!< @brief Gets the second.
     constexpr bool   isAM()   const { return _hour < 12; } //!< @brief Is ante meridian?
     constexpr bool   isPM()   const { return !isAM();    } //!< @brief Is post meridian?
+    constexpr uint32_t hash() const { return ((uint32_t)_hour << 12) + ((uint32_t)_minute << 6) + (uint32_t)_second; } //!< @brief A hash code for this time. */
     ///@}
 
     /*! @brief Is valid instance? */
@@ -310,7 +313,7 @@ class LocalTime
     int8_t _hour   { MIN_HOUR };
     int8_t _minute { MIN_MINUTE };
     int8_t _second { MIN_SECOND };
-    int8_t _pad0{0}; // Padding
+    __attribute__((unused)) int8_t _pad{0}; // padding
 
     static constexpr int8_t  MIN_HOUR = 0;
     static constexpr int8_t  MAX_HOUR = 23;

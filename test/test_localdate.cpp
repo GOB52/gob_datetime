@@ -222,6 +222,60 @@ TEST(LocalDate, Basic)
             EXPECT_FALSE(ld.valid()) << e;
         }
     }
+
+    // hash
+    {
+        constexpr LocalDate ld0(2345, 6, 7);
+        constexpr LocalDate ld1(ld0);
+        constexpr LocalDate ldy0(ld0.year() - 1, ld0.month(), ld0.day());
+        constexpr LocalDate ldy1(ld0.year() + 1, ld0.month(), ld0.day());
+        constexpr LocalDate ldm0(ld0.year(), ld0.month() - 1, ld0.day());
+        constexpr LocalDate ldm1(ld0.year(), ld0.month() + 1, ld0.day());
+        constexpr LocalDate ldd0(ld0.year(), ld0.month(), ld0.day() - 1);
+        constexpr LocalDate ldd1(ld0.year(), ld0.month(), ld0.day() + 1);
+
+        EXPECT_EQ(ld0.hash(), ld1.hash());
+        //printf("%s:%u/%x | %s:%u/%x\n", ld0.toString().c_str(),ld0.hash(), ld0.hash(), ld1.toString().c_str(),ld1.hash(), ld1.hash());
+
+        {
+            EXPECT_NE(ldy0.hash(), ld0.hash());
+            EXPECT_NE(ldy0, ld0);
+            EXPECT_NE(ldy1.hash(), ld0.hash());
+            EXPECT_NE(ldy1, ld0);
+            EXPECT_NE(ldy0.hash(), ldy1.hash());
+            EXPECT_NE(ldy0, ldy1);
+            //printf("%s:%u/%x | %s:%u/%x\n", ldy0.toString().c_str(),ldy0.hash(), ldy0.hash(), ldy1.toString().c_str(),ldy1.hash(), ldy1.hash());
+        }
+
+        {
+            EXPECT_NE(ldm0.hash(), ld0.hash());
+            EXPECT_NE(ldm0, ld0);
+            EXPECT_NE(ldm1.hash(), ld0.hash());
+            EXPECT_NE(ldm1, ld0);
+            EXPECT_NE(ldm0.hash(), ldm1.hash());
+            EXPECT_NE(ldm0, ldm1);
+            //printf("%s:%u/%x | %s:%u/%x\n", ldm0.toString().c_str(),ldm0.hash(), ldm0.hash(), ldm1.toString().c_str(),ldm1.hash(), ldm1.hash());
+        }
+
+        {
+            EXPECT_NE(ldd0.hash(), ld0.hash());
+            EXPECT_NE(ldd0, ld0);
+            EXPECT_NE(ldd1.hash(), ld0.hash());
+            EXPECT_NE(ldd1, ld0);
+            EXPECT_NE(ldd0.hash(), ldd1.hash());
+            EXPECT_NE(ldd0, ldd1);
+            //printf("%s:%u/%x | %s:%u/%x\n", ldd0.toString().c_str(),ldd0.hash(), ldd0.hash(), ldd1.toString().c_str(),ldd1.hash(), ldd1.hash());
+        }
+
+        {
+            EXPECT_NE(ldy0.hash(), ldm0.hash());
+            EXPECT_NE(ldy0, ldm0);
+            EXPECT_NE(ldy0.hash(), ldd0.hash());
+            EXPECT_NE(ldy0, ldd0);
+            EXPECT_NE(ldm0.hash(), ldd0.hash());
+            EXPECT_NE(ldm0, ldd0);
+        }
+    }
 }
 
 TEST(LocalDate, InstanceMethods)
