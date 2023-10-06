@@ -115,11 +115,7 @@ void removeMockClock()
 // ----------------------------------------------------------------------
 // class LocalDate
 const LocalDate LocalDate::MIN(MIN_YEAR, MIN_MONTH, MIN_DAY);
-#ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
-const LocalDate LocalDate::MAX(MAX_YEAR, 1, 19); // 2038-01-19 ... The Year 2038 problem!
-#else
-const LocalDate LocalDate::MAX(MAX_YEAR, MAX_MONTH, 31);
-#endif
+const LocalDate LocalDate::MAX(MAX_YEAR, MONTH_OF_MAX_DATE, DAY_OF_MAX_DATE);
 
 // for GCC C++11,C++14
 #if !defined(__clang__) && defined(__GNUG__) && __cplusplus < 201703L
@@ -127,6 +123,8 @@ constexpr int8_t  LocalDate::_dayOfWeekTable[12];
 constexpr int8_t  LocalDate::_lengthOfMonthTable[2][12];
 constexpr int16_t LocalDate::_daysOfMonthTable[2][12];
 #endif
+
+const char LocalDate::DEFAULT_PARSE_FORMAT[] = "%Y-%m-%d";
 
 LocalDateTime LocalDate::atStartOfDay() const
 {
@@ -197,15 +195,11 @@ LocalDate LocalDate::now()
     return LocalDateTime::now().toLocalDate();
 }
 
-LocalDate LocalDate::parse(const char* s)
+LocalDate LocalDate::parse(const char* dateString, const char* formatString)
 {
     struct tm tmp{};
-    strptime(s, "%Y-%m-%d", &tmp);
+    strptime(dateString, formatString ? formatString : DEFAULT_PARSE_FORMAT, &tmp);
     return LocalDate(tm2year(tmp.tm_year), tm2month(tmp.tm_mon), tmp.tm_mday);
-    /*
-    return (strptime(s, "%Y-%m-%d", &tmp) != nullptr) ?
-            LocalDate(tm2year(tmp.tm_year), tm2month(tmp.tm_mon), tmp.tm_mday) : LocalDate();
-    */
 }
 
 

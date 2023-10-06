@@ -133,7 +133,7 @@ class LocalDate
     constexpr LocalDate() {}
     constexpr LocalDate(const int16_t y, const int8_t m, const int8_t d) : _year(y), _month(m), _day(d) {}
     constexpr explicit LocalDate(const struct tm& tm) : LocalDate(tm2year(tm.tm_year), tm2month(tm.tm_mon), tm.tm_mday) {}
-    explicit  LocalDate(const char* s) : LocalDate() { *this = parse(s); }
+    explicit  LocalDate(const char* dateString, const char* formatString = nullptr) : LocalDate() { *this = parse(dateString, formatString); }
     ///@}
     
     ///@name Properties
@@ -154,9 +154,9 @@ class LocalDate
     /*! @brief Is valid instance? */
     constexpr bool valid() const
     {
-        return (_year != MAX_YEAR) ?
-                  (_year >= MIN_YEAR && _year <= MAX_YEAR && _month >= MIN_MONTH && _month <= MAX_MONTH   && _day >= MIN_DAY && _day <= lengthOfMonth())
-                : (_month >= MIN_MONTH && _month <= MAX.month() && _day >= MIN_DAY && _day <= MAX.day());
+        return (_year < MIN_YEAR || _year > MAX_YEAR || _month < MIN_MONTH || _month > MAX_MONTH || _day < MIN_DAY || _day > lengthOfMonth() ) ? false :
+                (_year != MAX_YEAR) ? true :
+                (_month <= MONTH_OF_MAX_DATE && _day <= DAY_OF_MAX_DATE);
     }
     /*! @brief Combines this date with the time of midnight to create a LocalDateTime at the start of this date. */
     LocalDateTime atStartOfDay() const;
@@ -184,8 +184,11 @@ class LocalDate
     /*! @brief Obtains an instance of LocalDate from a year and day-of-year. */
     static LocalDate ofYearDay(const int16_t yy, int16_t doy);
 #endif
-    /*! @brief Obtains an instance of LocalDate from a text string such as 2009-08-07. */
-    static LocalDate parse(const char* s);
+    /*! @brief Obtains an instance of LocalDate from a text string such as 2009-08-07.
+      @param s string for parse
+      @param fmt format string for parse if exists. (default as DEFAULT_PARSE_FORMAT)
+     */
+    static LocalDate parse(const char* dateString, const char* formatString = nullptr);
 
 #if __cplusplus < 202002L
     friend inline bool operator==(const LocalDate& a, const LocalDate& b) { return a.toEpochDay() == b.toEpochDay(); }
@@ -202,31 +205,39 @@ class LocalDate
     static const LocalDate MIN; //!< @brief The minimum supported date.
     static const LocalDate MAX; //!< @brief The maximum supported date.
 
+    static constexpr int8_t  MIN_MONTH = 1;
+    static constexpr int8_t  MAX_MONTH = 12;;
+    static constexpr int8_t  MIN_DAY = 1; // Max is referenced from _lengthOfMonthTable.
+    static constexpr int16_t MIN_YEAR = 1970;
+#if defined(GOBLIB_DATETIME_USE_TIME_T_32BIT)
+    // 2038-01-19 ... The Year 2038 problem!
+    static constexpr int16_t MAX_YEAR = 2038;
+    static constexpr int8_t MONTH_OF_MAX_DATE = 1;
+    static constexpr int8_t DAY_OF_MAX_DATE = 19;
+#else
+    static constexpr int16_t MAX_YEAR = 32767;
+    static constexpr int8_t MONTH_OF_MAX_DATE{12};
+    static constexpr int8_t DAY_OF_MAX_DATE{31};
+#endif
+
   private:
     int16_t _year  { MIN_YEAR };
     int8_t  _month { MIN_MONTH };
     int8_t  _day   { MIN_DAY };
 
-    static constexpr int16_t MIN_YEAR = 1970;
-#ifdef GOBLIB_DATETIME_USE_TIME_T_32BIT
-    static constexpr int16_t MAX_YEAR = 2038;
-#else
-    static constexpr int16_t MAX_YEAR = 32767;
-#endif
-    static constexpr int8_t  MIN_MONTH = 1;
-    static constexpr int8_t  MAX_MONTH = 12;;
-    static constexpr int8_t  MIN_DAY = 1;
-    static constexpr int8_t  _dayOfWeekTable[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
-    static constexpr int8_t  _lengthOfMonthTable[2][12] =
+    static constexpr int8_t  _dayOfWeekTable[]{ 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+    static constexpr int8_t  _lengthOfMonthTable[2][12]
     {
         { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }, // standard
         { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }, // leap year
     };
-    static constexpr int16_t _daysOfMonthTable[2][12] =
+    static constexpr int16_t _daysOfMonthTable[2][12]
     {
         { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 }, // standard
         { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 }, // leap year
     };
+
+    static const char DEFAULT_PARSE_FORMAT[];
 };
 
 
@@ -243,7 +254,7 @@ class LocalTime
     constexpr LocalTime(const int8_t hour, const int8_t minute, const int8_t second)
             : _hour(hour), _minute(minute), _second(second) {}
     constexpr explicit LocalTime(const struct tm& tm) : LocalTime(tm.tm_hour, tm.tm_min, tm.tm_sec) {}
-    explicit  LocalTime(const char* s) : LocalTime() { *this = parse(s); }
+    explicit  LocalTime(const char* s) : LocalTime() { *this = parse(s); (void)_pad0; /* Suppress unused member variable warnings */ }
     ///@}
     
     ///@name Properties
@@ -299,7 +310,7 @@ class LocalTime
     int8_t _hour   { MIN_HOUR };
     int8_t _minute { MIN_MINUTE };
     int8_t _second { MIN_SECOND };
-    int8_t _pad{0};
+    int8_t _pad0{0}; // Padding
 
     static constexpr int8_t  MIN_HOUR = 0;
     static constexpr int8_t  MAX_HOUR = 23;
