@@ -122,12 +122,26 @@ TEST(LocalTime, InstanceMethods)
 {
     // atDate
     {
-        LocalTime lt(12,23,34);
-        LocalDate ld = LocalDate::now();
-        LocalDateTime ldt = lt.atDate(ld);
-        EXPECT_EQ(lt.hour(), ldt.hour());
-        EXPECT_EQ(lt.minute(), ldt.minute());
-        EXPECT_EQ(lt.second(), ldt.second());
+        { // Valid
+            LocalTime lt(12,23,34);
+            LocalDate ld = LocalDate::now();
+            LocalDateTime ldt = lt.atDate(ld);
+            EXPECT_EQ(lt.hour(), ldt.hour());
+            EXPECT_EQ(lt.minute(), ldt.minute());
+            EXPECT_EQ(lt.second(), ldt.second());
+        }
+        { // Invalid
+            LocalTime lt(-12,23,54); // Invalid time
+            LocalDate ld = LocalDate::now();
+            LocalDateTime ldt = lt.atDate(ld);
+            EXPECT_FALSE(ldt.valid());
+        }
+        { // Invalid
+            LocalTime lt(1,2,3);
+            LocalDate ld(13456, 99, 99); // Invalid date
+            LocalDateTime ldt = lt.atDate(ld);
+            EXPECT_FALSE(ldt.valid());
+        }
     }
     // toSecondOfDay
     {
