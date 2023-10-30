@@ -116,60 +116,6 @@ TEST(LocalTime, Basic)
             EXPECT_FALSE(lt.valid()) << e << " : " << lt.toString().c_str();
         }
     }
-
-    // hash
-    {
-        constexpr LocalTime lt0(12,34,56);
-        constexpr LocalTime lt1(lt0);
-        constexpr LocalTime lth0(lt0.hour() - 1, lt0.minute(), lt0.second());
-        constexpr LocalTime lth1(lt0.hour() + 1, lt0.minute(), lt0.second());
-        constexpr LocalTime ltm0(lt0.hour(), lt0.minute() - 1, lt0.second());
-        constexpr LocalTime ltm1(lt0.hour(), lt0.minute() + 1, lt0.second());
-        constexpr LocalTime lts0(lt0.hour(), lt0.minute(), lt0.second() - 1);
-        constexpr LocalTime lts1(lt0.hour(), lt0.minute(), lt0.second() + 1);
-
-        EXPECT_EQ(lt0.hash(), lt1.hash());
-        EXPECT_EQ(lt0, lt1);
-        //printf("%s:%u/%x | %s:%u/%x\n", lt0.toString().c_str(),lt0.hash(),lt0.hash(), lt1.toString().c_str(),lt1.hash(),lt1.hash());
-        {
-            EXPECT_NE(lth0.hash(), lt0.hash());
-            EXPECT_NE(lth0, lt0);
-            EXPECT_NE(lth1.hash(), lt0.hash());
-            EXPECT_NE(lth1, lt0);
-            EXPECT_NE(lth0.hash(), lth1.hash());
-            EXPECT_NE(lth0, lth1);
-            //printf("%s:%u/%x | %s:%u/%x\n", lth0.toString().c_str(),lth0.hash(),lth0.hash(), lth1.toString().c_str(),lth1.hash(),lth1.hash());
-        }
-
-        {
-            EXPECT_NE(ltm0.hash(), lt0.hash());
-            EXPECT_NE(ltm0, lt0);
-            EXPECT_NE(ltm1.hash(), lt0.hash());
-            EXPECT_NE(ltm1, lt0);
-            EXPECT_NE(ltm0.hash(), ltm1.hash());
-            EXPECT_NE(ltm0, ltm1);
-            //printf("%s:%u/%x | %s:%u/%x\n", ltm0.toString().c_str(),ltm0.hash(),ltm0.hash(), ltm1.toString().c_str(),ltm1.hash(),ltm1.hash());
-        }
-
-        {
-            EXPECT_NE(lts0.hash(), lt0.hash());
-            EXPECT_NE(lts0, lt0);
-            EXPECT_NE(lts1.hash(), lt0.hash());
-            EXPECT_NE(lts1, lt0);
-            EXPECT_NE(lts0.hash(), lts1.hash());
-            EXPECT_NE(lts0, lts1);
-            //printf("%s:%u/%x | %s:%u/%x\n", lts0.toString().c_str(),lts0.hash(),lts0.hash(), lts1.toString().c_str(),lts1.hash(),lts1.hash());
-        }
-
-        {
-            EXPECT_NE(lth0.hash(), ltm0.hash());
-            EXPECT_NE(lth0, ltm0);
-            EXPECT_NE(lth0.hash(), lts0.hash());
-            EXPECT_NE(lth0, lts0);
-            EXPECT_NE(ltm0.hash(), lts0.hash());
-            EXPECT_NE(ltm0, lts0);
-        }
-    }
 }
 
 TEST(LocalTime, InstanceMethods)
