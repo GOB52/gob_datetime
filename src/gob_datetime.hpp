@@ -138,17 +138,18 @@ class LocalDate
     
     ///@name Properties
     ///@{
-    constexpr int16_t   year()      const { return _year;  } //!< @brief Gets the year.
-    constexpr int8_t    month()     const { return _month; } //!< @brief Gets the month.
-    constexpr int8_t    day()       const { return _day;   } //!< @brief Gets the day of month.
+    constexpr int16_t   year()      const     { return _year;  } //!< @brief Gets the year.
+    constexpr int8_t    month()     const     { return _month; } //!< @brief Gets the month.
+    constexpr int8_t    day()       const     { return _day;   } //!< @brief Gets the day of month.
     constexpr DayOfWeek dayOfWeek() const
     {
         return static_cast<DayOfWeek>( ((year() - (month() < 3)) + (year() - (month() < 3)) / 4 - (year() - (month() < 3)) / 100 + (year() - (month() < 3)) / 400 + _dayOfWeekTable[month() - 1] + day()) % 7 );
     } //!< @brief Gets the day of week, which is an enum DayOfWeek.
-    constexpr int16_t dayOfYear() const { return _daysOfMonthTable[ isLeapYear() ][ month() - 1] + day() - 1; } //!< @brief Gets the day of year. (same as struct tm.tm_yday)
-    constexpr bool isLeapYear() const { return (year() % 4 == 0) && ((year() % 100) != 0 || (year() % 400) == 0); } //!< @brief Checks if the year is a leap year, according to the ISO proleptic calendar system rules.
-    constexpr int8_t lengthOfMonth() const {  return _lengthOfMonthTable[ isLeapYear() ][month() - 1]; } //!< @brief Returns the length of the month represented by this date.
-    constexpr int16_t lengthOfYear() const { return isLeapYear() ? 366 : 365; } //!<  @brief Returns the length of the year represented by this date.
+    constexpr int16_t   dayOfYear() const     { return _daysOfMonthTable[ isLeapYear() ][ month() - 1] + day() - 1; } //!< @brief Gets the day of year. (same as struct tm.tm_yday)
+    constexpr bool      isLeapYear() const    { return (year() % 4 == 0) && ((year() % 100) != 0 || (year() % 400) == 0); } //!< @brief Checks if the year is a leap year, according to the ISO proleptic calendar system rules.
+    constexpr int8_t    lengthOfMonth() const {  return _lengthOfMonthTable[ isLeapYear() ][month() - 1]; } //!< @brief Returns the length of the month represented by this date.
+    constexpr int16_t   lengthOfYear() const  { return isLeapYear() ? 366 : 365; } //!<  @brief Returns the length of the year represented by this date.
+    constexpr uint32_t  hash() const          { return ((uint32_t)_year << 11) + ((uint32_t)_month << 6) + (uint32_t)_day; } //!< @brief A hash code for this. */
     ///@}
 
     /*! @brief Is valid instance? */
@@ -244,6 +245,7 @@ class LocalDate
 /*!
   @class LocalTime
   @brief A time without a time-zone in the ISO-8601 calendar system, such as 12:34:56.
+  @warning Not support ms/us/ns.
  */
 class LocalTime
 {
@@ -254,17 +256,18 @@ class LocalTime
     constexpr LocalTime(const int8_t hour, const int8_t minute, const int8_t second)
             : _hour(hour), _minute(minute), _second(second) {}
     constexpr explicit LocalTime(const struct tm& tm) : LocalTime(tm.tm_hour, tm.tm_min, tm.tm_sec) {}
-    explicit  LocalTime(const char* s) : LocalTime() { *this = parse(s); (void)_pad0; /* Suppress unused member variable warnings */ }
+    explicit  LocalTime(const char* s) : LocalTime() { *this = parse(s); }
     ///@}
     
     ///@name Properties
     ///@{
-    constexpr int8_t hour()   const { return _hour;   } //!< @brief Gets the hour.
-    constexpr int8_t hour12() const { return (_hour % 12) ? (_hour % 12) : 12; } //!< @brief Gets the 12 hour clock [1-12]
-    constexpr int8_t minute() const { return _minute; } //!< @brief Gets the minute.
-    constexpr int8_t second() const { return _second; } //!< @brief Gets the second.
-    constexpr bool   isAM()   const { return _hour < 12; } //!< @brief Is ante meridian?
-    constexpr bool   isPM()   const { return !isAM();    } //!< @brief Is post meridian?
+    constexpr int8_t   hour()   const { return _hour;   } //!< @brief Gets the hour.
+    constexpr int8_t   hour12() const { return (_hour % 12) ? (_hour % 12) : 12; } //!< @brief Gets the 12 hour clock [1-12]
+    constexpr int8_t   minute() const { return _minute; } //!< @brief Gets the minute.
+    constexpr int8_t   second() const { return _second; } //!< @brief Gets the second.
+    constexpr bool     isAM()   const { return _hour < 12; } //!< @brief Is ante meridian?
+    constexpr bool     isPM()   const { return !isAM();    } //!< @brief Is post meridian?
+    constexpr uint32_t hash() const { return ((uint32_t)_hour << 12) + ((uint32_t)_minute << 6) + (uint32_t)_second; } //!< @brief A hash code for this.
     ///@}
 
     /*! @brief Is valid instance? */
@@ -310,7 +313,7 @@ class LocalTime
     int8_t _hour   { MIN_HOUR };
     int8_t _minute { MIN_MINUTE };
     int8_t _second { MIN_SECOND };
-    int8_t _pad0{0}; // Padding
+    __attribute__((unused)) int8_t _pad{0}; // padding
 
     static constexpr int8_t  MIN_HOUR = 0;
     static constexpr int8_t  MAX_HOUR = 23;
@@ -343,8 +346,9 @@ class ZoneOffset
     constexpr float   totalMinutes() const { return _seconds / (float)SEC_PER_MIN;  } //!< @brief Gets the total minutes.
     constexpr int32_t totalSeconds() const { return _seconds; } //!< @brief Gets the total seconds.
     constexpr int32_t hour()         const { return _seconds / SEC_PER_HOUR; } //!< @brief Gets the hour part.
-    constexpr int32_t minute()       const { return (_seconds / SEC_PER_MIN) % SEC_PER_MIN; } //!< Gets the minute part.
-    constexpr int32_t second()       const { return _seconds % SEC_PER_MIN; } //!< Gets the second part.
+    constexpr int32_t minute()       const { return (_seconds / SEC_PER_MIN) % SEC_PER_MIN; } //!< @brief Gets the minute part.
+    constexpr int32_t second()       const { return _seconds % SEC_PER_MIN; } //!< @brief Gets the second part.
+    constexpr uint32_t hash()        const { return _seconds; } //!< @brief A hash code for this.
     ///@}
 
     /*! @brief Is valid instance? */
@@ -407,9 +411,10 @@ class OffsetTime
     constexpr int8_t     hour12() const { return _lt.hour12(); } //!< @brief Gets the 12 hour clock [1-12]
     constexpr int8_t     minute() const { return _lt.minute(); } //!< @brief Gets the minute.
     constexpr int8_t     second() const { return _lt.second(); } //!< @brief Gets the second.
-    constexpr bool       isAM()   const { return _lt.isAM(); } //!< @brief Is ante meridian?
-    constexpr bool       isPM()   const { return _lt.isPM(); } //!< @brief Is post meridian?
-    constexpr ZoneOffset offset() const { return _zoff; } //!< Gets the ZoneOffset.
+    constexpr bool       isAM()   const { return _lt.isAM();   } //!< @brief Is ante meridian?
+    constexpr bool       isPM()   const { return _lt.isPM();   } //!< @brief Is post meridian?
+    constexpr ZoneOffset offset() const { return _zoff;        } //!< @brief Gets the ZoneOffset.
+    constexpr uint32_t   hash()   const { return _lt.hash() ^ _zoff.hash(); } //!< @brief A hash code for this.
     ///@}
 
     /*! @brief Is valid instance? */
@@ -500,6 +505,7 @@ class LocalDateTime
     constexpr int8_t    second()     const { return _time.second(); } //!< @brief Gets the second.
     constexpr bool      isAM()       const { return _time.isAM(); } //!< @brief Is ante meridian?
     constexpr bool      isPM()       const { return _time.isPM(); } //!< @brief Is post meridian?
+    constexpr uint32_t  hash()       const { return _date.hash() ^ _time.hash(); } //!< @brief A hash code for this.
     ///@}
 
     /*! @brief Is valid instance? */
@@ -587,6 +593,7 @@ class OffsetDateTime
     constexpr bool       isAM()       const { return _datetime.isAM(); } //!< @brief Is ante meridian?
     constexpr bool       isPM()       const { return _datetime.isPM(); } //!< @brief Is post meridian?
     constexpr ZoneOffset offset()     const { return _zoff; } //!< @brief Gets the offset.
+    constexpr uint32_t   hash()       const { return _datetime.hash() ^ _zoff.hash(); } //!< @brief A hash code for this.
     ///@}
 
     /*! @brief Is valid instance? */
