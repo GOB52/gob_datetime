@@ -252,11 +252,15 @@ class LocalTime
   public:
     ///@name Constructors
     ///@{
-    constexpr LocalTime() : _pad(0) {}
+    constexpr LocalTime() { }
     constexpr LocalTime(const int8_t hour, const int8_t minute, const int8_t second)
             : _hour(hour), _minute(minute), _second(second) {}
     constexpr explicit LocalTime(const struct tm& tm) : LocalTime(tm.tm_hour, tm.tm_min, tm.tm_sec) {}
-    explicit  LocalTime(const char* s) : LocalTime() { *this = parse(s); }
+    explicit  LocalTime(const char* s) : LocalTime()
+    {
+        *this = parse(s);
+        (void)_pad; /* Disable unused private member warning */
+    }
     ///@}
     
     ///@name Properties
@@ -314,7 +318,6 @@ class LocalTime
     int8_t _minute { MIN_MINUTE };
     int8_t _second { MIN_SECOND };
     int8_t _pad{0}; // padding
-
     static constexpr int8_t  MIN_HOUR = 0;
     static constexpr int8_t  MAX_HOUR = 23;
     static constexpr int8_t  MIN_MINUTE = 0;
