@@ -5,8 +5,12 @@
 #include <gtest/gtest.h>
 #include <gob_datetime.hpp>
 #include "helper.hpp"
+#include <algorithm>
 
 using namespace goblib::datetime;
+
+// Not enough memory on M5Stack.
+#if !defined(ARDUINO)
 
 TEST(Hash, LocalDate)
 {
@@ -72,3 +76,5 @@ TEST(Hash, LocalDateTime)
 // ZoneOffset hash() same as totalSeconds(), then skip test.
 // OffsetTime hash() hash() make by LocalTime.hash() ^ ZoneOffset.hash(), then skip test.
 // OffsetDateTime hash() make by LocalDatetTime().hash() ^ ZoneOffset.hash(), then skip test.
+
+#endif
