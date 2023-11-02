@@ -3,6 +3,8 @@
 #include <WiFi.h>
 #include <cstdio>
 #include <gob_datetime.hpp>
+#include <esp_sntp.h>
+
 using namespace goblib::datetime;
 
 #ifndef TIMEZONE_LOCATION
@@ -22,29 +24,45 @@ const char* ntpURL[] =
 void setup()
 {
     M5.begin();
+    M5.Display.clear(TFT_DARKGREY);
     WiFi.begin(); // Connect to credential in hardware. (ESP32 saves the last Wifi connection)
+    
     int tcount = 20;
-    printf("%s", "Connect to WiFi:");
+    M5_LOGE("Connect to WiFi:");
     while(tcount-- > 0 && WiFi.status() != WL_CONNECTED)
     {
-        putchar('.');
+        M5_LOGI(".");
         delay(500);
     }
-    putchar('\n');
-
+    M5.Display.clear(TFT_DARKGREEN);
     if(WiFi.status() != WL_CONNECTED)
     {
-        printf("*** Failed to connect WiFi ***\n");
+        M5_LOGI("*** Failed to connect WiFi ***\n");
+        M5.Display.clear(TFT_RED);
     }
 
     // Configurate local time.
     const char* tzstr = locationToPOSIX(TIMEZONE_LOCATION);
     configTzTime((tzstr ? tzstr : ""), ntpURL[0], ntpURL[1], ntpURL[2]);
-    struct tm tmp{};
-    getLocalTime(&tmp); // Waiting for time synchronization.
-    
+
+    // Waiting for time synchronization.
+    int32_t retry{10};    
+    sntp_sync_status_t st;
+    while( ((st = sntp_get_sync_status()) == SNTP_SYNC_STATUS_RESET) && --retry >= 0)
+    {
+        M5_LOGI("   ...sync in progress");
+        delay(1000);
+    }
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
+
+    struct tm tmp{};
+    if(!getLocalTime(&tmp))
+    {
+        M5_LOGE("Failed to configTime");
+        delay(1000);
+        abort();
+    }
 
     auto p = goblib::datetime::locationToPOSIX("America/Los_Angeles"); // => "PST8PDT,M3.2.0,M11.1.0"
     setenv("TZ", p ? p : "", 1);
@@ -57,7 +75,7 @@ void print_time()
 {
     OffsetDateTime odt = OffsetDateTime::now(); // Get current time and offset.
     OffsetDateTime odt2 = odt.withOffsetSameEpoch(zo); // Convert zone offset to +9:00
-    printf("[%s] <%s>=> [%s] <%s>\n",
+    M5_LOGI("[%s] <%s>=> [%s] <%s>",
            odt.toString().c_str(), odt.toLocalDateTime().toString().c_str(),
            odt2.toString().c_str(), odt2.toLocalDateTime().toString().c_str());
 }
